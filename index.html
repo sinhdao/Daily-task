@@ -26,7 +26,29 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .item.done span{text-decoration:line-through;color:var(--muted)}
 .item button{border:0;background:none;color:var(--muted);font-size:22px;padding:0 6px;line-height:1}
 .empty{color:var(--muted);font-size:14px;padding:6px 4px}
-.item.idea{border-left:4px solid #e9b94a}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.bulb{position:relative;flex:none;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;padding:0}
+.bulb svg{width:27px;height:27px}
+.bulb .bd{position:absolute;top:-4px;right:-4px;background:#2f9e5f;color:#fff;border-radius:10px;font-size:11px;font-weight:700;min-width:19px;height:19px;line-height:19px;text-align:center;padding:0 5px}
+.bulb .bd:empty{display:none}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);width:min(520px,94vw);max-height:88vh;padding:16px;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dh strong{font-size:18px}
+.dh button{border:0;background:none;color:var(--muted);font-size:26px;line-height:1;padding:0 4px}
+textarea#it{display:block;width:100%;font:inherit;font-size:18px;line-height:1.4;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;resize:none;min-height:84px;max-height:40vh}
+textarea#it:focus{outline:2px solid var(--accent)}
+.save{display:block;width:100%;margin-top:10px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-size:17px;font-weight:600;padding:13px}
+.iditem{display:flex;gap:12px;align-items:flex-start;padding:12px 2px;border-bottom:1px solid var(--line)}
+.iditem:last-child{border-bottom:0}
+.iditem input{width:26px;height:26px;accent-color:#2f9e5f;flex:none;margin-top:1px}
+.iditem .tx{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word}
+.iditem .tx small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.iditem.done .tx{color:var(--muted)}
+.iditem.done .tx span{text-decoration:line-through}
+.iditem button{flex:none;border:0;background:none;color:var(--muted);font-size:22px;padding:0 4px;line-height:1}
+.iditem button.p{font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:5px 8px;line-height:1.2;white-space:nowrap}
+.idh{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 2px 2px}
 .item.future{border-left:4px solid #6aa0d8}
 .item small{color:var(--muted);font-size:12px;margin-left:6px}
 .toast{position:fixed;left:50%;bottom:130px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
@@ -49,8 +71,10 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
 </head>
 <body>
 <div class="wrap">
-  <h1>Việc hằng ngày</h1>
-  <div class="date" id="date"></div>
+  <div class="top">
+    <div><h1>Việc hằng ngày</h1><div class="date" id="date"></div></div>
+    <button class="bulb" id="bulb" type="button" aria-label="Ý tưởng mới"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8a6.2 6.2 0 0 0-3.7 11.2c.6.5 1 1.2 1 2v.5h5.4V16c0-.8.4-1.5 1-2A6.2 6.2 0 0 0 12 2.8z" fill="#f5c542" stroke="#b7791f" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.6 19.2h4.8M10.4 21.4h3.2" stroke="#8a8a82" stroke-width="1.6" stroke-linecap="round"/></svg><span class="bd" id="bdg"></span></button>
+  </div>
   <div class="prog"><i id="bar"></i></div>
   <div class="count" id="count"></div>
   <h2>Việc lặp mỗi ngày</h2>
@@ -60,18 +84,22 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   <h2>Ngày mai · <span id="tomDate"></span></h2>
   <div id="tomorrow"></div>
   <div id="laterWrap"><h2>Sắp tới</h2><div id="later"></div></div>
-  <h2>Ý tưởng mới</h2>
-  <div id="ideas"></div>
   <button class="clear" id="clear">Xóa các việc đã xong</button>
 </div>
 <form id="f" autocomplete="off">
   <div class="row hide" id="dateRow"><label for="dt">Làm vào ngày</label><input type="date" id="dt"></div>
   <div class="row"><textarea id="t" rows="2" placeholder="Thêm việc cần làm… (mỗi dòng là một việc)" maxlength="600" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="vi" enterkeyhint="enter" aria-label="Nội dung"></textarea></div>
   <div class="row" id="ctl">
-    <select id="k" aria-label="Thêm vào"><option value="once">Hôm nay</option><option value="tom">Ngày mai</option><option value="pick">Chọn ngày…</option><option value="daily">Mỗi ngày</option><option value="idea">Ý tưởng</option></select>
+    <select id="k" aria-label="Thêm vào"><option value="once">Hôm nay</option><option value="tom">Ngày mai</option><option value="pick">Chọn ngày…</option><option value="daily">Mỗi ngày</option></select>
     <button class="go" type="submit">Thêm</button>
   </div>
 </form>
+<dialog id="idDlg">
+  <div class="dh"><strong>💡 Ý tưởng mới</strong><button type="button" id="idClose" aria-label="Đóng">×</button></div>
+  <textarea id="it" rows="3" maxlength="600" placeholder="Ghi ý tưởng của bạn…" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="vi" aria-label="Ý tưởng"></textarea>
+  <button class="save" type="button" id="idSave">Lưu ý tưởng</button>
+  <div id="idList"></div>
+</dialog>
 <div class="toast" id="toast"></div>
 <script>
 (function(){
@@ -97,7 +125,16 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     return '<div class="item'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+'><span>'+esc(i.text)+'</span><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
   }
   function ideaRow(i){
-    return '<div class="item idea"><span>'+esc(i.text)+'</span><button class="p" data-p="'+i.id+'" aria-label="Chuyển thành việc hôm nay">→ Việc</button><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
+    var at=i.at?'Nhập ngày '+i.at.split("-").reverse().join("/"):"";
+    return '<div class="iditem'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+' aria-label="Đã hoàn thành"><div class="tx"><span>'+esc(i.text)+'</span><small>'+at+'</small></div>'+(i.done?'':'<button class="p" data-p="'+i.id+'" aria-label="Chuyển thành việc hôm nay">→ Việc</button>')+'<button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
+  }
+  function renderIdeas(){
+    var all=s.items.filter(function(i){return i.kind==="idea"});
+    var open=all.filter(function(i){return!i.done}).sort(function(a,b){return(a.at||"")<(b.at||"")?1:(a.at||"")>(b.at||"")?-1:0});
+    var done=all.filter(function(i){return i.done});
+    $("#bdg").textContent=open.length?String(open.length):"";
+    $("#idList").innerHTML=(open.length?open.map(ideaRow).join(""):'<div class="empty">Chưa có ý tưởng nào đang chờ.</div>')+
+      (done.length?'<div class="idh">Đã hoàn thành ('+done.length+')</div>'+done.map(ideaRow).join(""):"");
   }
   function futureRow(i,showDate){
     return '<div class="item future"><span>'+esc(i.text)+(showDate?'<small>'+lbl(i.for)+'</small>':'')+'</span><button class="p" data-t2="'+i.id+'" aria-label="Chuyển sang hôm nay">→ Hôm nay</button><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
@@ -115,13 +152,12 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     $("#later").innerHTML=lt.map(function(i){return futureRow(i,true)}).join("");
     $("#daily").innerHTML=d.map(row).join("")||'<div class="empty">Chưa có. Chọn "Mỗi ngày" khi thêm.</div>';
     $("#once").innerHTML=o.map(row).join("")||'<div class="empty">Chưa có việc nào cho hôm nay.</div>';
-    var ideas=s.items.filter(function(i){return i.kind==="idea"});
-    $("#ideas").innerHTML=ideas.map(ideaRow).join("")||'<div class="empty">Có ý tưởng gì hay thì ghi lại ở đây. Chọn "Ý tưởng" khi thêm.</div>';
+    renderIdeas();
     var tasks=d.concat(o),n=tasks.length,k=tasks.filter(function(i){return i.done}).length;
     $("#bar").style.width=(n?k/n*100:0)+"%";
     $("#count").textContent=n?("Đã xong "+k+"/"+n+" việc"):"Hãy thêm việc đầu tiên bên dưới";
   }
-  function syncSel(){var v=$("#k").value;$("#t").placeholder=v==="idea"?"Ghi một ý tưởng mới…":v==="tom"?"Việc ngày mai…":v==="pick"?"Tên việc…":"Thêm việc cần làm… (mỗi dòng là một việc)";$("#dateRow").classList.toggle("hide",v!=="pick");if(v==="pick"&&!$("#dt").value)$("#dt").value=shift(today(),2)}
+  function syncSel(){var v=$("#k").value;$("#t").placeholder=v==="tom"?"Việc ngày mai…":v==="pick"?"Tên việc…":"Thêm việc cần làm… (mỗi dòng là một việc)";$("#dateRow").classList.toggle("hide",v!=="pick");if(v==="pick"&&!$("#dt").value)$("#dt").value=shift(today(),2)}
   $("#k").addEventListener("change",syncSel);
   function fitForm(){
     var t=$("#t");t.style.height="auto";t.style.height=Math.min(t.scrollHeight+2,window.innerHeight*0.4)+"px";
@@ -137,8 +173,18 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     lines.forEach(function(v,n){s.items.push({id:Date.now().toString(36)+n+Math.random().toString(36).slice(2,5),text:v,kind:kind,done:false,for:fd})});
     $("#t").value="";save();render();fitForm();
     var c=lines.length>1?(lines.length+" việc"):"";
-    toast(sel==="tom"?"Đã thêm "+c+" vào Ngày mai":sel==="pick"&&fd?("Đã thêm "+c+" vào "+lbl(fd)):sel==="daily"?"Đã thêm "+c+" vào việc lặp mỗi ngày":sel==="idea"?"Đã ghi ý tưởng":"Đã thêm "+c+" vào hôm nay");
+    toast(sel==="tom"?"Đã thêm "+c+" vào Ngày mai":sel==="pick"&&fd?("Đã thêm "+c+" vào "+lbl(fd)):sel==="daily"?"Đã thêm "+c+" vào việc lặp mỗi ngày":"Đã thêm "+c+" vào hôm nay");
   });
+  var itx=$("#it");
+  function fitIdea(){itx.style.height="auto";itx.style.height=Math.min(itx.scrollHeight+2,window.innerHeight*0.4)+"px"}
+  itx.addEventListener("input",fitIdea);
+  $("#bulb").onclick=function(){renderIdeas();$("#idDlg").showModal();setTimeout(function(){itx.focus()},50)};
+  $("#idClose").onclick=function(){$("#idDlg").close()};
+  $("#idSave").onclick=function(){
+    var v=itx.value.trim();if(!v){itx.focus();return}
+    s.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:v,kind:"idea",done:false,for:"",at:today()});
+    itx.value="";fitIdea();save();render();itx.focus();
+  };
   document.addEventListener("click",function(e){
     var c=e.target.getAttribute&&e.target.getAttribute("data-c"),d=e.target.getAttribute&&e.target.getAttribute("data-d"),pr=e.target.getAttribute&&e.target.getAttribute("data-p"),t2=e.target.getAttribute&&e.target.getAttribute("data-t2");
     if(t2){s.items.forEach(function(i){if(i.id===t2){i.for=""}});save();render();toast("Đã chuyển sang hôm nay")}
@@ -148,7 +194,9 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   });
   $("#clear").onclick=function(){s.items=s.items.filter(function(i){return i.kind!=="once"||!i.done});save();render()};
   document.addEventListener("visibilitychange",function(){if(!document.hidden){rollover();render()}});
-  load();rollover();render();
+  load();
+  s.items.forEach(function(i){if(i.kind==="idea"&&!i.at)i.at=s.day||today()});
+  rollover();render();
   if(new Date().getHours()>=20)$("#k").value="tom";
   syncSel();fitForm();
 })();

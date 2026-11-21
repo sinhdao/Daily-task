@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2f6f5e">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon-512.png">
 <title>Việc hằng ngày</title>
 <style>
 :root{--bg:#f6f6f3;--card:#fff;--ink:#1c1c1a;--muted:#77776f;--line:#e4e3dd;--accent:#2f6f5e}
@@ -24,6 +26,8 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .item.done span{text-decoration:line-through;color:var(--muted)}
 .item button{border:0;background:none;color:var(--muted);font-size:22px;padding:0 6px;line-height:1}
 .empty{color:var(--muted);font-size:14px;padding:6px 4px}
+.item.idea{border-left:4px solid #e9b94a}
+.item.idea button.p{flex:none;font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:5px 9px;line-height:1.2;white-space:nowrap}
 form{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
 .row{max-width:560px;margin:0 auto;display:flex;gap:8px}
 input[type=text]{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
@@ -42,12 +46,14 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   <div id="daily"></div>
   <h2>Việc hôm nay</h2>
   <div id="once"></div>
+  <h2>Ý tưởng mới</h2>
+  <div id="ideas"></div>
   <button class="clear" id="clear">Xóa các việc đã xong</button>
 </div>
 <form id="f" autocomplete="off">
   <div class="row">
     <input type="text" id="t" placeholder="Thêm việc cần làm…" maxlength="150" required>
-    <select id="k" aria-label="Loại"><option value="once">Hôm nay</option><option value="daily">Mỗi ngày</option></select>
+    <select id="k" aria-label="Loại"><option value="once">Hôm nay</option><option value="daily">Mỗi ngày</option><option value="idea">Ý tưởng</option></select>
     <button class="go" type="submit">Thêm</button>
   </div>
 </form>
@@ -62,7 +68,7 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   function rollover(){
     var t=today();
     if(s.day!==t){
-      s.items=s.items.filter(function(i){return i.kind==="daily"||!i.done}); // việc hôm qua đã xong thì bỏ, chưa xong thì giữ lại
+      s.items=s.items.filter(function(i){return i.kind==="daily"||i.kind==="idea"||!i.done}); // việc hôm qua đã xong thì bỏ, chưa xong thì giữ lại
       s.items.forEach(function(i){if(i.kind==="daily")i.done=false});
       s.day=t;save();
     }
@@ -70,26 +76,33 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   function row(i){
     return '<div class="item'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+'><span>'+esc(i.text)+'</span><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
   }
+  function ideaRow(i){
+    return '<div class="item idea"><span>'+esc(i.text)+'</span><button class="p" data-p="'+i.id+'" aria-label="Chuyển thành việc hôm nay">→ Việc</button><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
+  }
   function render(){
     $("#date").textContent=new Date().toLocaleDateString("vi-VN",{weekday:"long",day:"numeric",month:"long"});
     var d=s.items.filter(function(i){return i.kind==="daily"}),o=s.items.filter(function(i){return i.kind==="once"});
     $("#daily").innerHTML=d.map(row).join("")||'<div class="empty">Chưa có. Chọn "Mỗi ngày" khi thêm.</div>';
     $("#once").innerHTML=o.map(row).join("")||'<div class="empty">Chưa có việc nào cho hôm nay.</div>';
-    var n=s.items.length,k=s.items.filter(function(i){return i.done}).length;
+    var ideas=s.items.filter(function(i){return i.kind==="idea"});
+    $("#ideas").innerHTML=ideas.map(ideaRow).join("")||'<div class="empty">Có ý tưởng gì hay thì ghi lại ở đây. Chọn "Ý tưởng" khi thêm.</div>';
+    var tasks=d.concat(o),n=tasks.length,k=tasks.filter(function(i){return i.done}).length;
     $("#bar").style.width=(n?k/n*100:0)+"%";
     $("#count").textContent=n?("Đã xong "+k+"/"+n+" việc"):"Hãy thêm việc đầu tiên bên dưới";
   }
+  $("#k").addEventListener("change",function(){$("#t").placeholder=this.value==="idea"?"Ghi một ý tưởng mới…":"Thêm việc cần làm…"});
   $("#f").addEventListener("submit",function(e){
     e.preventDefault();var v=$("#t").value.trim();if(!v)return;
     s.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:v,kind:$("#k").value,done:false});
     $("#t").value="";save();render();
   });
   document.addEventListener("click",function(e){
-    var c=e.target.getAttribute&&e.target.getAttribute("data-c"),d=e.target.getAttribute&&e.target.getAttribute("data-d");
+    var c=e.target.getAttribute&&e.target.getAttribute("data-c"),d=e.target.getAttribute&&e.target.getAttribute("data-d"),pr=e.target.getAttribute&&e.target.getAttribute("data-p");
+    if(pr){s.items.forEach(function(i){if(i.id===pr){i.kind="once";i.done=false}});save();render()}
     if(c){s.items.forEach(function(i){if(i.id===c)i.done=e.target.checked});save();render()}
     if(d){s.items=s.items.filter(function(i){return i.id!==d});save();render()}
   });
-  $("#clear").onclick=function(){s.items=s.items.filter(function(i){return i.kind==="daily"||!i.done});save();render()};
+  $("#clear").onclick=function(){s.items=s.items.filter(function(i){return i.kind!=="once"||!i.done});save();render()};
   document.addEventListener("visibilitychange",function(){if(!document.hidden){rollover();render()}});
   load();rollover();render();
 })();

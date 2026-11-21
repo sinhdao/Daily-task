@@ -84,7 +84,7 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   <div class="count" id="count"></div>
   <h2 class="h-daily">Việc lặp mỗi ngày</h2>
   <div id="daily"></div>
-  <h2 class="h-today">Việc hôm nay</h2>
+  <h2 class="h-today">Việc hôm nay · <span id="todayDate"></span></h2>
   <div id="once"></div>
   <h2 class="h-tom">Ngày mai · <span id="tomDate"></span></h2>
   <div id="tomorrow"></div>
@@ -151,7 +151,7 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
         o=s.items.filter(function(i){return i.kind==="once"&&(!i.for||i.for<=T)}),
         tm=s.items.filter(function(i){return i.kind==="once"&&i.for===TM}),
         lt=s.items.filter(function(i){return i.kind==="once"&&i.for>TM}).sort(function(a,b){return a.for<b.for?-1:1});
-    $("#tomDate").textContent=lbl(TM);
+    $("#tomDate").textContent=lbl(TM);$("#todayDate").textContent=lbl(T);
     $("#tomorrow").innerHTML=tm.map(function(i){return futureRow(i,false)}).join("")||'<div class="empty">Chưa có. Chọn "Ngày mai" ở ô bên dưới để lên danh sách trước khi ngủ.</div>';
     $("#laterWrap").classList.toggle("hide",!lt.length);
     $("#later").innerHTML=lt.map(function(i){return futureRow(i,true)}).join("");

@@ -26,6 +26,11 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .item.done span{text-decoration:line-through;color:var(--muted)}
 .item button{border:0;background:none;color:var(--muted);font-size:22px;padding:0 6px;line-height:1}
 .empty{color:var(--muted);font-size:14px;padding:6px 4px}
+.h-daily,.h-today,.h-tom{font-weight:800;font-size:14px}
+.h-daily{color:var(--ink)}
+.h-today{color:#c98a00}
+.h-tom{color:#2f9e5f}
+@media(prefers-color-scheme:dark){.h-today{color:#f5c542}.h-tom{color:#5fd08a}}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .bulb{position:relative;flex:none;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;padding:0}
 .bulb svg{width:27px;height:27px}
@@ -77,11 +82,11 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   </div>
   <div class="prog"><i id="bar"></i></div>
   <div class="count" id="count"></div>
-  <h2>Việc lặp mỗi ngày</h2>
+  <h2 class="h-daily">Việc lặp mỗi ngày</h2>
   <div id="daily"></div>
-  <h2>Việc hôm nay</h2>
+  <h2 class="h-today">Việc hôm nay</h2>
   <div id="once"></div>
-  <h2>Ngày mai · <span id="tomDate"></span></h2>
+  <h2 class="h-tom">Ngày mai · <span id="tomDate"></span></h2>
   <div id="tomorrow"></div>
   <div id="laterWrap"><h2>Sắp tới</h2><div id="later"></div></div>
   <button class="clear" id="clear">Xóa các việc đã xong</button>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f5e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Việc hằng ngày</title>
+<style>
+:root{--bg:#f6f6f3;--card:#fff;--ink:#1c1c1a;--muted:#77776f;--line:#e4e3dd;--accent:#2f6f5e}
+@media(prefers-color-scheme:dark){:root{--bg:#141414;--card:#202020;--ink:#ecebe6;--muted:#9a9993;--line:#333;--accent:#5fb59d}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 system-ui,-apple-system,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:560px;margin:0 auto;padding:18px 14px 90px}
+h1{font-size:24px;margin:0}
+.date{color:var(--muted);font-size:14px;margin:2px 0 14px}
+.prog{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.count{font-size:13px;color:var(--muted);margin-bottom:16px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:20px 4px 8px}
+.item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.item input{width:24px;height:24px;accent-color:var(--accent);flex:none}
+.item span{flex:1;word-break:break-word}
+.item.done span{text-decoration:line-through;color:var(--muted)}
+.item button{border:0;background:none;color:var(--muted);font-size:22px;padding:0 6px;line-height:1}
+.empty{color:var(--muted);font-size:14px;padding:6px 4px}
+form{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+.row{max-width:560px;margin:0 auto;display:flex;gap:8px}
+input[type=text]{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 8px}
+.go{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;padding:0 16px}
+.clear{display:block;margin:14px auto 0;background:none;border:0;color:var(--muted);font:inherit;font-size:14px;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Việc hằng ngày</h1>
+  <div class="date" id="date"></div>
+  <div class="prog"><i id="bar"></i></div>
+  <div class="count" id="count"></div>
+  <h2>Việc lặp mỗi ngày</h2>
+  <div id="daily"></div>
+  <h2>Việc hôm nay</h2>
+  <div id="once"></div>
+  <button class="clear" id="clear">Xóa các việc đã xong</button>
+</div>
+<form id="f" autocomplete="off">
+  <div class="row">
+    <input type="text" id="t" placeholder="Thêm việc cần làm…" maxlength="150" required>
+    <select id="k" aria-label="Loại"><option value="once">Hôm nay</option><option value="daily">Mỗi ngày</option></select>
+    <button class="go" type="submit">Thêm</button>
+  </div>
+</form>
+<script>
+(function(){
+  var KEY="viec-hang-ngay-v1", $=function(s){return document.querySelector(s)};
+  var s={items:[],day:""};
+  function today(){var d=new Date(),z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
+  function load(){try{var r=JSON.parse(localStorage.getItem(KEY));if(r&&r.items)s=r}catch(e){}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+  function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function rollover(){
+    var t=today();
+    if(s.day!==t){
+      s.items=s.items.filter(function(i){return i.kind==="daily"||!i.done}); // việc hôm qua đã xong thì bỏ, chưa xong thì giữ lại
+      s.items.forEach(function(i){if(i.kind==="daily")i.done=false});
+      s.day=t;save();
+    }
+  }
+  function row(i){
+    return '<div class="item'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+'><span>'+esc(i.text)+'</span><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
+  }
+  function render(){
+    $("#date").textContent=new Date().toLocaleDateString("vi-VN",{weekday:"long",day:"numeric",month:"long"});
+    var d=s.items.filter(function(i){return i.kind==="daily"}),o=s.items.filter(function(i){return i.kind==="once"});
+    $("#daily").innerHTML=d.map(row).join("")||'<div class="empty">Chưa có. Chọn "Mỗi ngày" khi thêm.</div>';
+    $("#once").innerHTML=o.map(row).join("")||'<div class="empty">Chưa có việc nào cho hôm nay.</div>';
+    var n=s.items.length,k=s.items.filter(function(i){return i.done}).length;
+    $("#bar").style.width=(n?k/n*100:0)+"%";
+    $("#count").textContent=n?("Đã xong "+k+"/"+n+" việc"):"Hãy thêm việc đầu tiên bên dưới";
+  }
+  $("#f").addEventListener("submit",function(e){
+    e.preventDefault();var v=$("#t").value.trim();if(!v)return;
+    s.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:v,kind:$("#k").value,done:false});
+    $("#t").value="";save();render();
+  });
+  document.addEventListener("click",function(e){
+    var c=e.target.getAttribute&&e.target.getAttribute("data-c"),d=e.target.getAttribute&&e.target.getAttribute("data-d");
+    if(c){s.items.forEach(function(i){if(i.id===c)i.done=e.target.checked});save();render()}
+    if(d){s.items=s.items.filter(function(i){return i.id!==d});save();render()}
+  });
+  $("#clear").onclick=function(){s.items=s.items.filter(function(i){return i.kind==="daily"||!i.done});save();render()};
+  document.addEventListener("visibilitychange",function(){if(!document.hidden){rollover();render()}});
+  load();rollover();render();
+})();
+</script>
+</body>
+</html>

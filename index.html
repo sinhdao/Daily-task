@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon-512.png">
-<title>Việc hằng ngày</title>
+<title>Daily task</title>
 <style>
 :root{--bg:#f6f6f3;--card:#fff;--ink:#1c1c1a;--muted:#77776f;--line:#e4e3dd;--accent:#2f6f5e}
 @media(prefers-color-scheme:dark){:root{--bg:#141414;--card:#202020;--ink:#ecebe6;--muted:#9a9993;--line:#333;--accent:#5fb59d}}
@@ -77,32 +77,32 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
 <body>
 <div class="wrap">
   <div class="top">
-    <div><h1>Việc hằng ngày</h1><div class="date" id="date"></div></div>
-    <button class="bulb" id="bulb" type="button" aria-label="Ý tưởng mới"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8a6.2 6.2 0 0 0-3.7 11.2c.6.5 1 1.2 1 2v.5h5.4V16c0-.8.4-1.5 1-2A6.2 6.2 0 0 0 12 2.8z" fill="#f5c542" stroke="#b7791f" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.6 19.2h4.8M10.4 21.4h3.2" stroke="#8a8a82" stroke-width="1.6" stroke-linecap="round"/></svg><span class="bd" id="bdg"></span></button>
+    <div><h1>Daily task</h1><div class="date" id="date"></div></div>
+    <button class="bulb" id="bulb" type="button" aria-label="New ideas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8a6.2 6.2 0 0 0-3.7 11.2c.6.5 1 1.2 1 2v.5h5.4V16c0-.8.4-1.5 1-2A6.2 6.2 0 0 0 12 2.8z" fill="#f5c542" stroke="#b7791f" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.6 19.2h4.8M10.4 21.4h3.2" stroke="#8a8a82" stroke-width="1.6" stroke-linecap="round"/></svg><span class="bd" id="bdg"></span></button>
   </div>
   <div class="prog"><i id="bar"></i></div>
   <div class="count" id="count"></div>
-  <h2 class="h-daily">Việc lặp mỗi ngày</h2>
+  <h2 class="h-daily">Repeating daily tasks</h2>
   <div id="daily"></div>
-  <h2 class="h-today">Việc hôm nay · <span id="todayDate"></span></h2>
+  <h2 class="h-today">Today · <span id="todayDate"></span></h2>
   <div id="once"></div>
-  <h2 class="h-tom">Ngày mai · <span id="tomDate"></span></h2>
+  <h2 class="h-tom">Tomorrow · <span id="tomDate"></span></h2>
   <div id="tomorrow"></div>
-  <div id="laterWrap"><h2>Sắp tới</h2><div id="later"></div></div>
-  <button class="clear" id="clear">Xóa các việc đã xong</button>
+  <div id="laterWrap"><h2>Upcoming</h2><div id="later"></div></div>
+  <button class="clear" id="clear">Clear completed tasks</button>
 </div>
 <form id="f" autocomplete="off">
-  <div class="row hide" id="dateRow"><label for="dt">Làm vào ngày</label><input type="date" id="dt"></div>
-  <div class="row"><textarea id="t" rows="2" placeholder="Thêm việc cần làm… (mỗi dòng là một việc)" maxlength="600" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="vi" enterkeyhint="enter" aria-label="Nội dung"></textarea></div>
+  <div class="row hide" id="dateRow"><label for="dt">Do it on</label><input type="date" id="dt"></div>
+  <div class="row"><textarea id="t" rows="2" placeholder="Add a task… (one per line)" maxlength="600" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="en" enterkeyhint="enter" aria-label="Task"></textarea></div>
   <div class="row" id="ctl">
-    <select id="k" aria-label="Thêm vào"><option value="once">Hôm nay</option><option value="tom">Ngày mai</option><option value="pick">Chọn ngày…</option><option value="daily">Mỗi ngày</option></select>
-    <button class="go" type="submit">Thêm</button>
+    <select id="k" aria-label="Add to"><option value="once">Today</option><option value="tom">Tomorrow</option><option value="pick">Pick a date…</option><option value="daily">Every day</option></select>
+    <button class="go" type="submit">Add</button>
   </div>
 </form>
 <dialog id="idDlg">
-  <div class="dh"><strong>💡 Ý tưởng mới</strong><button type="button" id="idClose" aria-label="Đóng">×</button></div>
-  <textarea id="it" rows="3" maxlength="600" placeholder="Ghi ý tưởng của bạn…" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="vi" aria-label="Ý tưởng"></textarea>
-  <button class="save" type="button" id="idSave">Lưu ý tưởng</button>
+  <div class="dh"><strong>💡 New ideas</strong><button type="button" id="idClose" aria-label="Close">×</button></div>
+  <textarea id="it" rows="3" maxlength="600" placeholder="Write down your idea…" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="en" aria-label="Idea"></textarea>
+  <button class="save" type="button" id="idSave">Save idea</button>
   <div id="idList"></div>
 </dialog>
 <div class="toast" id="toast"></div>
@@ -112,8 +112,9 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   var s={items:[],day:""};
   function today(){var d=new Date(),z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
   function shift(iso,n){var p=iso.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]+n),z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
-  var WD=["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"];
-  function lbl(iso){var p=iso.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);return WD[d.getDay()]+" "+p[2]+"/"+p[1]}
+  var WD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function nice(iso,withYear){var p=iso.split("-");return MON[+p[1]-1]+" "+(+p[2])+(withYear?", "+p[0]:"")}
+  function lbl(iso){var p=iso.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);return WD[d.getDay()]+", "+nice(iso)}
   function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove("on")},1700)}
   function load(){try{var r=JSON.parse(localStorage.getItem(KEY));if(r&&r.items)s=r}catch(e){}}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
@@ -121,48 +122,48 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   function rollover(){
     var t=today();
     if(s.day!==t){
-      s.items=s.items.filter(function(i){return i.kind!=="once"||!i.done||(i.for&&i.for>=t)}); // việc hôm qua đã xong thì bỏ, chưa xong thì giữ lại
+      s.items=s.items.filter(function(i){return i.kind!=="once"||!i.done||(i.for&&i.for>=t)}); // drop finished one-off tasks, keep unfinished ones
       s.items.forEach(function(i){if(i.kind==="daily")i.done=false});
       s.day=t;save();
     }
   }
   function row(i){
-    return '<div class="item'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+'><span>'+esc(i.text)+'</span><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
+    return '<div class="item'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+'><span>'+esc(i.text)+'</span><button data-d="'+i.id+'" aria-label="Delete">×</button></div>';
   }
   function ideaRow(i){
-    var at=i.at?'Nhập ngày '+i.at.split("-").reverse().join("/"):"";
-    return '<div class="iditem'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+' aria-label="Đã hoàn thành"><div class="tx"><span>'+esc(i.text)+'</span><small>'+at+'</small></div>'+(i.done?'':'<button class="p" data-p="'+i.id+'" aria-label="Chuyển thành việc hôm nay">→ Việc</button>')+'<button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
+    var at=i.at?'Added '+nice(i.at,true):"";
+    return '<div class="iditem'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+' aria-label="Completed"><div class="tx"><span>'+esc(i.text)+'</span><small>'+at+'</small></div>'+(i.done?'':'<button class="p" data-p="'+i.id+'" aria-label="Move to tasks for today">→ Task</button>')+'<button data-d="'+i.id+'" aria-label="Delete">×</button></div>';
   }
   function renderIdeas(){
     var all=s.items.filter(function(i){return i.kind==="idea"});
     var open=all.filter(function(i){return!i.done}).sort(function(a,b){return(a.at||"")<(b.at||"")?1:(a.at||"")>(b.at||"")?-1:0});
     var done=all.filter(function(i){return i.done});
     $("#bdg").textContent=open.length?String(open.length):"";
-    $("#idList").innerHTML=(open.length?open.map(ideaRow).join(""):'<div class="empty">Chưa có ý tưởng nào đang chờ.</div>')+
-      (done.length?'<div class="idh">Đã hoàn thành ('+done.length+')</div>'+done.map(ideaRow).join(""):"");
+    $("#idList").innerHTML=(open.length?open.map(ideaRow).join(""):'<div class="empty">No ideas waiting.</div>')+
+      (done.length?'<div class="idh">Completed ('+done.length+')</div>'+done.map(ideaRow).join(""):"");
   }
   function futureRow(i,showDate){
-    return '<div class="item future"><span>'+esc(i.text)+(showDate?'<small>'+lbl(i.for)+'</small>':'')+'</span><button class="p" data-t2="'+i.id+'" aria-label="Chuyển sang hôm nay">→ Hôm nay</button><button data-d="'+i.id+'" aria-label="Xóa">×</button></div>';
+    return '<div class="item future"><span>'+esc(i.text)+(showDate?'<small>'+lbl(i.for)+'</small>':'')+'</span><button class="p" data-t2="'+i.id+'" aria-label="Move to today">→ Today</button><button data-d="'+i.id+'" aria-label="Delete">×</button></div>';
   }
   function render(){
-    $("#date").textContent=new Date().toLocaleDateString("vi-VN",{weekday:"long",day:"numeric",month:"long"});
+    $("#date").textContent=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
     var T=today(),TM=shift(T,1);
     var d=s.items.filter(function(i){return i.kind==="daily"}),
         o=s.items.filter(function(i){return i.kind==="once"&&(!i.for||i.for<=T)}),
         tm=s.items.filter(function(i){return i.kind==="once"&&i.for===TM}),
         lt=s.items.filter(function(i){return i.kind==="once"&&i.for>TM}).sort(function(a,b){return a.for<b.for?-1:1});
     $("#tomDate").textContent=lbl(TM);$("#todayDate").textContent=lbl(T);
-    $("#tomorrow").innerHTML=tm.map(function(i){return futureRow(i,false)}).join("")||'<div class="empty">Chưa có. Chọn "Ngày mai" ở ô bên dưới để lên danh sách trước khi ngủ.</div>';
+    $("#tomorrow").innerHTML=tm.map(function(i){return futureRow(i,false)}).join("")||'<div class="empty">Nothing yet. Choose "Tomorrow" below to plan before bed.</div>';
     $("#laterWrap").classList.toggle("hide",!lt.length);
     $("#later").innerHTML=lt.map(function(i){return futureRow(i,true)}).join("");
-    $("#daily").innerHTML=d.map(row).join("")||'<div class="empty">Chưa có. Chọn "Mỗi ngày" khi thêm.</div>';
-    $("#once").innerHTML=o.map(row).join("")||'<div class="empty">Chưa có việc nào cho hôm nay.</div>';
+    $("#daily").innerHTML=d.map(row).join("")||'<div class="empty">Nothing yet. Choose "Every day" when adding.</div>';
+    $("#once").innerHTML=o.map(row).join("")||'<div class="empty">No tasks for today.</div>';
     renderIdeas();
     var tasks=d.concat(o),n=tasks.length,k=tasks.filter(function(i){return i.done}).length;
     $("#bar").style.width=(n?k/n*100:0)+"%";
-    $("#count").textContent=n?("Đã xong "+k+"/"+n+" việc"):"Hãy thêm việc đầu tiên bên dưới";
+    $("#count").textContent=n?(k+" of "+n+" done"):"Add your first task below";
   }
-  function syncSel(){var v=$("#k").value;$("#t").placeholder=v==="tom"?"Việc ngày mai…":v==="pick"?"Tên việc…":"Thêm việc cần làm… (mỗi dòng là một việc)";$("#dateRow").classList.toggle("hide",v!=="pick");if(v==="pick"&&!$("#dt").value)$("#dt").value=shift(today(),2)}
+  function syncSel(){var v=$("#k").value;$("#t").placeholder=v==="tom"?"Task for tomorrow…":v==="pick"?"Task name…":"Add a task… (one per line)";$("#dateRow").classList.toggle("hide",v!=="pick");if(v==="pick"&&!$("#dt").value)$("#dt").value=shift(today(),2)}
   $("#k").addEventListener("change",syncSel);
   function fitForm(){
     var t=$("#t");t.style.height="auto";t.style.height=Math.min(t.scrollHeight+2,window.innerHeight*0.4)+"px";
@@ -174,11 +175,11 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     var lines=$("#t").value.split(/\n+/).map(function(x){return x.trim()}).filter(Boolean);if(!lines.length)return;
     var sel=$("#k").value,T=today(),kind=(sel==="tom"||sel==="pick")?"once":sel,fd="";
     if(sel==="tom")fd=shift(T,1);
-    if(sel==="pick"){fd=$("#dt").value;if(!fd){toast("Hãy chọn ngày");return}if(fd<=T)fd=""}
+    if(sel==="pick"){fd=$("#dt").value;if(!fd){toast("Pick a date");return}if(fd<=T)fd=""}
     lines.forEach(function(v,n){s.items.push({id:Date.now().toString(36)+n+Math.random().toString(36).slice(2,5),text:v,kind:kind,done:false,for:fd})});
     $("#t").value="";save();render();fitForm();
-    var c=lines.length>1?(lines.length+" việc"):"";
-    toast(sel==="tom"?"Đã thêm "+c+" vào Ngày mai":sel==="pick"&&fd?("Đã thêm "+c+" vào "+lbl(fd)):sel==="daily"?"Đã thêm "+c+" vào việc lặp mỗi ngày":"Đã thêm "+c+" vào hôm nay");
+    var c=lines.length>1?(lines.length+" tasks"):"task";
+    toast(sel==="tom"?"Added "+c+" to Tomorrow":sel==="pick"&&fd?("Added "+c+" to "+lbl(fd)):sel==="daily"?"Added "+c+" to daily repeats":"Added "+c+" to Today");
   });
   var itx=$("#it");
   function fitIdea(){itx.style.height="auto";itx.style.height=Math.min(itx.scrollHeight+2,window.innerHeight*0.4)+"px"}
@@ -192,7 +193,7 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   };
   document.addEventListener("click",function(e){
     var c=e.target.getAttribute&&e.target.getAttribute("data-c"),d=e.target.getAttribute&&e.target.getAttribute("data-d"),pr=e.target.getAttribute&&e.target.getAttribute("data-p"),t2=e.target.getAttribute&&e.target.getAttribute("data-t2");
-    if(t2){s.items.forEach(function(i){if(i.id===t2){i.for=""}});save();render();toast("Đã chuyển sang hôm nay")}
+    if(t2){s.items.forEach(function(i){if(i.id===t2){i.for=""}});save();render();toast("Moved to today")}
     if(pr){s.items.forEach(function(i){if(i.id===pr){i.kind="once";i.done=false}});save();render()}
     if(c){s.items.forEach(function(i){if(i.id===c)i.done=e.target.checked});save();render()}
     if(d){s.items=s.items.filter(function(i){return i.id!==d});save();render()}

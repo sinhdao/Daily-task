@@ -59,7 +59,7 @@ label{display:block;font-size:12px;color:var(--muted);margin:10px 2px 4px}
 .sg .k{font-size:12px;color:var(--muted)}
 .sg .n{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px;word-break:break-word}
 .left{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
-.left .n{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.left .n{font-size:20px;white-space:nowrap;font-weight:800;font-variant-numeric:tabular-nums}
 .big{border-radius:14px;padding:14px;margin-bottom:10px;background:var(--card);border:1px solid var(--line)}
 .big .lbl{font-size:13px;color:var(--muted)}
 .big .num{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -85,6 +85,32 @@ dialog{border:1px solid var(--line);border-radius:16px;background:var(--card);co
 dialog::backdrop{background:rgba(0,0,0,.45)}
 .toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
 .toast.on{opacity:1}
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;cursor:pointer}
+.dcard .dh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.dcard .dh b{font-size:16px;word-break:break-word}
+.dcard .v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dcard .bar i{background:var(--good)}.dcard.bor .bar i{background:var(--out)}
+.dmeta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px;font-size:12px;color:var(--muted)}
+.tag{font-size:11px;border-radius:20px;padding:1px 8px;border:1px solid var(--line);background:var(--bg);color:var(--muted)}
+.tag.lent{color:var(--good);border-color:var(--good)}.tag.bor{color:var(--out);border-color:var(--out)}
+.tag.late{background:var(--bad);color:#fff;border-color:var(--bad)}
+.sg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center}
+.sg2 .k{font-size:12px;color:var(--muted)}.sg2 .n{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;word-break:break-word}
+.seg2{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0 4px}
+.seg2 button{border:0;background:var(--card);padding:9px 0;color:var(--muted);font-size:15px}
+.seg2 button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.prow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.prow:last-child{border-bottom:0}
+.prow .mid{flex:1;min-width:0}.prow .nt{font-size:12px;color:var(--muted)}
+.prow .v{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.prow button{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:4px 9px;color:var(--muted)}
+.prow button.arm{background:var(--bad);color:#fff;border-color:var(--bad)}
+.ghd{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 2px 8px;display:flex;justify-content:space-between}
+.tog3{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tog3 button{border:0;background:var(--bg);padding:10px 0;font-weight:600;color:var(--muted);font-size:15px}
+.tog3 button[aria-pressed=true][data-fd=lent]{background:var(--good);color:#fff}
+.tog3 button[aria-pressed=true][data-fd=bor]{background:var(--out);color:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .hide{display:none}
 </style>
 </head>
@@ -163,12 +189,31 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <div class="card" id="rBrkIn"></div>
     <button class="btn sec" id="copy">Sao chép dữ liệu (CSV) để sao lưu</button>
   </section>
+  <section id="tDebt" class="hide">
+    <h1>Cho vay &amp; vay nợ</h1>
+    <div class="card">
+      <div class="sg2">
+        <div><div class="k">Người khác nợ mình</div><div class="n inc" id="dLent"></div></div>
+        <div><div class="k">Mình nợ người khác</div><div class="n" id="dBor"></div></div>
+      </div>
+      <div class="left"><span class="sub">Chênh lệch (nhận − trả)</span><span class="n" id="dNet"></span></div>
+      <div class="sub" style="margin-top:8px">Mục này tách riêng, không tính vào thu chi và số dư.</div>
+    </div>
+    <button class="btn" id="dAdd" style="margin-top:0">＋ Thêm khoản cho vay / vay nợ</button>
+    <div class="seg2" id="dSeg">
+      <button data-f="open" aria-pressed="true">Đang nợ</button>
+      <button data-f="closed" aria-pressed="false">Đã tất toán</button>
+    </div>
+    <div id="dList"></div>
+    <button class="btn sec" id="dCopy">Sao chép dữ liệu nợ (CSV) để sao lưu</button>
+  </section>
 </div>
 
 <nav class="nav" role="tablist">
   <button role="tab" data-t="tAdd" aria-selected="true">＋ Ghi</button>
   <button role="tab" data-t="tHist" aria-selected="false">☰ Lịch sử</button>
   <button role="tab" data-t="tRep" aria-selected="false">▥ Báo cáo</button>
+  <button role="tab" data-t="tDebt" aria-selected="false">⇄ Nợ</button>
 </nav>
 
 <dialog id="dlg">
@@ -180,6 +225,47 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
   <button class="btn" id="eOk">Lưu</button>
   <button class="btn sec" id="eCancel">Hủy</button>
   <button class="btn sec danger" id="eDel">Xóa khoản này</button>
+</dialog>
+<dialog id="fDlg">
+  <strong id="fTitle">Thêm khoản</strong>
+  <div class="tog3" id="fTog" style="margin-top:10px">
+    <button type="button" data-fd="lent" aria-pressed="true">Mình cho vay</button>
+    <button type="button" data-fd="bor" aria-pressed="false">Mình đi vay</button>
+  </div>
+  <label for="fWho" id="fWhoL">Người vay</label><input id="fWho" maxlength="60" placeholder="Tên người">
+  <label for="fAmt">Số tiền (₫)</label><input id="fAmt" inputmode="numeric" placeholder="0">
+  <div class="two">
+    <div><label for="fDate">Ngày</label><input type="date" id="fDate"></div>
+    <div><label for="fDue">Hẹn trả (nếu có)</label><input type="date" id="fDue"></div>
+  </div>
+  <label for="fNote">Ghi chú</label><input id="fNote" maxlength="80">
+  <button class="btn" id="fOk">Lưu</button>
+  <button class="btn sec" id="fCancel">Hủy</button>
+</dialog>
+
+<dialog id="vDlg">
+  <strong id="vTitle"></strong>
+  <div class="dmeta" id="vSub"></div>
+  <div class="sg" style="margin:12px 0 4px">
+    <div><div class="k">Số tiền gốc</div><div class="n" id="vAmt"></div></div>
+    <div><div class="k" id="vPaidK">Đã trả</div><div class="n inc" id="vPaid"></div></div>
+    <div><div class="k">Còn lại</div><div class="n" id="vRest"></div></div>
+  </div>
+  <div class="ghd"><span id="vPaysT">Các lần trả</span></div>
+  <div id="vPays"></div>
+  <div id="vAddBox">
+    <div class="ghd"><span>Ghi nhận một lần trả</span></div>
+    <label for="pAmt" style="margin-top:0">Số tiền (₫)</label><input id="pAmt" inputmode="numeric" placeholder="0">
+    <div class="two">
+      <div><label for="pDate">Ngày</label><input type="date" id="pDate"></div>
+      <div><label for="pNote">Ghi chú</label><input id="pNote" maxlength="60"></div>
+    </div>
+    <button class="btn" id="pOk">Ghi nhận</button>
+    <button class="btn sec" id="pAll">Điền số còn lại (trả hết)</button>
+  </div>
+  <button class="btn sec" id="vEdit">Sửa thông tin khoản này</button>
+  <button class="btn sec danger" id="vDel">Xóa khoản này</button>
+  <button class="btn sec" id="vClose">Đóng</button>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -234,10 +320,11 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 
   /* ---------- tab ---------- */
   function showTab(id){
-    ["tAdd","tHist","tRep"].forEach(function(x){$("#"+x).classList.toggle("hide",x!==id)});
+    ["tAdd","tHist","tRep","tDebt"].forEach(function(x){$("#"+x).classList.toggle("hide",x!==id)});
     document.querySelectorAll(".nav button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.t===id)});
     if(id==="tHist")renderHist();
     if(id==="tRep")renderRep();
+    if(id==="tDebt")renderDebt();
     if(id==="tAdd")renderAdd();
     window.scrollTo(0,0);
   }
@@ -401,6 +488,124 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(function(){toast("Đã sao chép CSV")},fb);else fb();
   };
 
+
+  /* ---------- cho vay / vay nợ (tách riêng khỏi thu chi) ---------- */
+  var DKEY="chi-tieu-no-v1", debts=[], dFilter="open", dView=null, dEdit=null, fDir="lent", vDelArm=false;
+  function dLoad(){try{var r=JSON.parse(localStorage.getItem(DKEY));if(Array.isArray(r))debts=r}catch(e){}}
+  function dSave(){try{localStorage.setItem(DKEY,JSON.stringify(debts))}catch(e){}}
+  function paidOf(d){return (d.pays||[]).reduce(function(a,p){return a+p.amount},0)}
+  function restOf(d){return d.amount-paidOf(d)}
+  function dFind(id){return debts.filter(function(d){return d.id===id})[0]}
+  function fdate(s){if(!s)return"";var p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0]}
+  function dirName(d){return d.dir==="bor"?"Mình đi vay":"Mình cho vay"}
+  function dTag(d){return '<span class="tag '+(d.dir==="bor"?"bor":"lent")+'">'+dirName(d)+'</span>'}
+  function dueTag(d){
+    if(!d.due||restOf(d)<=0)return"";
+    var late=d.due<iso(new Date());
+    return '<span class="tag'+(late?" late":"")+'">'+(late?"Quá hạn ":"Hẹn ")+fdate(d.due)+'</span>';
+  }
+  function dCard(d){
+    var rest=restOf(d),done=rest<=0,pc=d.amount?Math.min(100,paidOf(d)/d.amount*100):0;
+    return '<div class="dcard'+(d.dir==="bor"?" bor":"")+'" data-did="'+d.id+'"><div class="dh"><b>'+esc(d.who)+'</b><span class="v">'+(done?"Đã tất toán":money(rest))+'</span></div>'+
+      '<div class="dmeta">'+dTag(d)+dueTag(d)+'<span>'+fdate(d.date)+' · gốc '+money(d.amount)+'</span></div>'+
+      '<div class="bar"><i style="width:'+pc+'%"></i></div>'+(d.note?'<div class="sub" style="margin-top:6px">'+esc(d.note)+'</div>':"")+'</div>';
+  }
+  function renderDebt(){
+    var lent=0,bor=0;
+    debts.forEach(function(d){var r=restOf(d);if(r>0){if(d.dir==="bor")bor+=r;else lent+=r}});
+    $("#dLent").textContent=money(lent);$("#dBor").textContent=money(bor);$("#dBor").className="n"+(bor>0?" neg":"");
+    var net=lent-bor;$("#dNet").textContent=signed(net);$("#dNet").className="n "+(net<0?"neg":net>0?"inc":"");
+    var open=dFilter==="open",html="";
+    var ls=debts.filter(function(d){return open?restOf(d)>0:restOf(d)<=0}).sort(function(a,b){return a.date<b.date?1:-1});
+    if(open){
+      [["lent","Người khác nợ mình",lent],["bor","Mình nợ người khác",bor]].forEach(function(g){
+        var gl=ls.filter(function(d){return(d.dir==="bor"?"bor":"lent")===g[0]});
+        if(gl.length)html+='<div class="ghd"><span>'+g[1]+'</span><span>'+money(g[2])+'</span></div>'+gl.map(dCard).join("");
+      });
+    }else html=ls.map(dCard).join("");
+    $("#dList").innerHTML=html||'<div class="card"><div class="empty">'+(open?"Chưa có khoản nào đang nợ":"Chưa có khoản nào tất toán")+'</div></div>';
+  }
+  $("#dSeg").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;dFilter=b.dataset.f;
+    document.querySelectorAll("#dSeg button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});renderDebt()});
+  $("#dList").addEventListener("click",function(e){var c=e.target.closest(".dcard");if(c)openDebt(c.dataset.did)});
+
+  /* thêm / sửa khoản */
+  function setDir(v){fDir=v;document.querySelectorAll("#fTog button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.fd===v)});$("#fWhoL").textContent=v==="bor"?"Người cho mình vay":"Người vay"}
+  $("#fTog").addEventListener("click",function(e){var b=e.target.closest("button");if(b)setDir(b.dataset.fd)});
+  $("#fAmt").addEventListener("input",function(){fmtInput(this)});
+  $("#pAmt").addEventListener("input",function(){fmtInput(this)});
+  $("#dAdd").onclick=function(){
+    dEdit=null;$("#fTitle").textContent="Thêm khoản cho vay / vay nợ";setDir("lent");
+    $("#fWho").value="";$("#fAmt").value="";$("#fDate").value=iso(new Date());$("#fDue").value="";$("#fNote").value="";
+    $("#fDlg").showModal();
+  };
+  $("#fCancel").onclick=function(){$("#fDlg").close();if(dEdit){var id=dEdit;dEdit=null;openDebt(id)}};
+  $("#fOk").onclick=function(){
+    var who=$("#fWho").value.trim(),a=Number(digits($("#fAmt").value));
+    if(!who){toast("Nhập tên người");$("#fWho").focus();return}
+    if(!a){toast("Nhập số tiền");$("#fAmt").focus();return}
+    var data={who:who,dir:fDir,amount:a,date:$("#fDate").value||iso(new Date()),due:$("#fDue").value||"",note:$("#fNote").value.trim()};
+    if(dEdit){var d=dFind(dEdit);if(d){var paid=paidOf(d);if(a<paid){toast("Số tiền gốc nhỏ hơn số đã trả ("+money(paid)+")");return}Object.keys(data).forEach(function(k){d[k]=data[k]})}var id=dEdit;dEdit=null;dSave();$("#fDlg").close();renderDebt();openDebt(id);toast("Đã cập nhật");return}
+    data.id=uid();data.pays=[];debts.push(data);dSave();$("#fDlg").close();renderDebt();toast("Đã thêm khoản");
+  };
+
+  /* chi tiết + ghi nhận trả */
+  function openDebt(id){
+    var d=dFind(id);if(!d)return;dView=id;vDelArm=false;$("#vDel").textContent="Xóa khoản này";
+    var bor=d.dir==="bor",rest=restOf(d);
+    $("#vTitle").textContent=d.who;
+    $("#vSub").innerHTML=dTag(d)+dueTag(d)+'<span>Ngày '+fdate(d.date)+'</span>'+(d.note?'<span>· '+esc(d.note)+'</span>':"");
+    $("#vAmt").textContent=money(d.amount);
+    $("#vPaidK").textContent=bor?"Mình đã trả":"Đã thu lại";
+    $("#vPaid").textContent=money(paidOf(d));
+    $("#vRest").textContent=rest>0?money(rest):"Đã tất toán";$("#vRest").className="n"+(rest>0&&bor?" neg":"");
+    $("#vPaysT").textContent=bor?"Các lần mình trả":"Các lần họ trả mình";
+    var ps=(d.pays||[]).slice().sort(function(a,b){return a.date<b.date?1:-1});
+    $("#vPays").innerHTML=ps.length?ps.map(function(p){
+      return '<div class="prow"><div class="mid"><div>'+fdate(p.date)+'</div>'+(p.note?'<div class="nt">'+esc(p.note)+'</div>':"")+'</div><div class="v">'+money(p.amount)+'</div><button data-pid="'+p.id+'" aria-label="Xóa lần trả">×</button></div>';
+    }).join(""):'<div class="empty" style="padding:8px">Chưa có lần trả nào</div>';
+    $("#vAddBox").classList.toggle("hide",rest<=0);
+    $("#pAmt").value="";$("#pNote").value="";$("#pDate").value=iso(new Date());
+    if(!$("#vDlg").open)$("#vDlg").showModal();
+  }
+  $("#pOk").onclick=function(){
+    var d=dFind(dView);if(!d)return;
+    var a=Number(digits($("#pAmt").value));
+    if(!a){toast("Nhập số tiền");$("#pAmt").focus();return}
+    if(a>restOf(d)){toast("Vượt quá số còn lại ("+money(restOf(d))+")");return}
+    d.pays=d.pays||[];d.pays.push({id:uid(),date:$("#pDate").value||iso(new Date()),amount:a,note:$("#pNote").value.trim()});
+    dSave();renderDebt();openDebt(d.id);toast(restOf(d)<=0?"Đã tất toán":"Đã ghi nhận "+money(a));
+  };
+  $("#pAll").onclick=function(){var d=dFind(dView);if(d){$("#pAmt").value=restOf(d).toLocaleString("vi-VN")}};
+  $("#vPays").addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;
+    if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Xóa?";return}
+    var d=dFind(dView);if(!d)return;
+    d.pays=d.pays.filter(function(p){return p.id!==b.dataset.pid});dSave();renderDebt();openDebt(d.id);toast("Đã xóa lần trả");
+  });
+  $("#vClose").onclick=function(){$("#vDlg").close();dView=null};
+  $("#vEdit").onclick=function(){
+    var d=dFind(dView);if(!d)return;dEdit=d.id;$("#vDlg").close();
+    $("#fTitle").textContent="Sửa khoản";setDir(d.dir==="bor"?"bor":"lent");
+    $("#fWho").value=d.who;$("#fAmt").value=d.amount.toLocaleString("vi-VN");$("#fDate").value=d.date;$("#fDue").value=d.due||"";$("#fNote").value=d.note||"";
+    $("#fDlg").showModal();
+  };
+  $("#vDel").onclick=function(){
+    if(!vDelArm){vDelArm=true;this.textContent="Bấm lần nữa để xóa (xóa cả các lần trả)";return}
+    debts=debts.filter(function(d){return d.id!==dView});dSave();$("#vDlg").close();dView=null;renderDebt();toast("Đã xóa");
+  };
+  $("#dCopy").onclick=function(){
+    var q=function(s){return '"'+String(s||"").replace(/"/g,'""')+'"'},rows=[];
+    debts.forEach(function(d){
+      rows.push(["Khoản",q(d.who),dirName(d),d.date,d.amount,q(d.note),d.due||""].join(","));
+      (d.pays||[]).forEach(function(p){rows.push(["Lần trả",q(d.who),dirName(d),p.date,p.amount,q(p.note),""].join(","))});
+    });
+    var csv="Loại,Người,Chiều,Ngày,Số tiền,Ghi chú,Hẹn trả\n"+rows.join("\n");
+    function fb(){var a=document.createElement("textarea");a.value=csv;document.body.appendChild(a);a.select();try{document.execCommand("copy");toast("Đã sao chép CSV")}catch(e){toast("Không sao chép được")}a.remove()}
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(function(){toast("Đã sao chép CSV")},fb);else fb();
+  };
+
+  dLoad();
   load();renderAdd();
 })();
 </script>

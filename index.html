@@ -37,8 +37,11 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .item button.p{flex:none;font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:5px 9px;line-height:1.2;white-space:nowrap}
 form{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
 .row{max-width:560px;margin:0 auto;display:flex;gap:8px}
-input[type=text]{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-select{max-width:116px}
+textarea#t{display:block;width:100%;font:inherit;font-size:18px;line-height:1.4;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;resize:none;min-height:76px;max-height:40vh;overflow-y:auto}
+textarea#t:focus,select:focus{outline:2px solid var(--accent);outline-offset:0}
+#ctl{margin-top:8px}
+#ctl select{flex:1;min-width:0;font-size:16px;padding:12px 10px}
+#ctl .go{font-size:17px;padding:0 26px}
 select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 8px}
 .go{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;padding:0 16px}
 .clear{display:block;margin:14px auto 0;background:none;border:0;color:var(--muted);font:inherit;font-size:14px;text-decoration:underline}
@@ -63,8 +66,8 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
 </div>
 <form id="f" autocomplete="off">
   <div class="row hide" id="dateRow"><label for="dt">Làm vào ngày</label><input type="date" id="dt"></div>
-  <div class="row">
-    <input type="text" id="t" placeholder="Thêm việc cần làm…" maxlength="150" required>
+  <div class="row"><textarea id="t" rows="2" placeholder="Thêm việc cần làm… (mỗi dòng là một việc)" maxlength="600" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="vi" enterkeyhint="enter" aria-label="Nội dung"></textarea></div>
+  <div class="row" id="ctl">
     <select id="k" aria-label="Thêm vào"><option value="once">Hôm nay</option><option value="tom">Ngày mai</option><option value="pick">Chọn ngày…</option><option value="daily">Mỗi ngày</option><option value="idea">Ý tưởng</option></select>
     <button class="go" type="submit">Thêm</button>
   </div>
@@ -118,16 +121,23 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     $("#bar").style.width=(n?k/n*100:0)+"%";
     $("#count").textContent=n?("Đã xong "+k+"/"+n+" việc"):"Hãy thêm việc đầu tiên bên dưới";
   }
-  function syncSel(){var v=$("#k").value;$("#t").placeholder=v==="idea"?"Ghi một ý tưởng mới…":v==="tom"?"Việc ngày mai…":v==="pick"?"Tên việc…":"Thêm việc cần làm…";$("#dateRow").classList.toggle("hide",v!=="pick");if(v==="pick"&&!$("#dt").value)$("#dt").value=shift(today(),2)}
+  function syncSel(){var v=$("#k").value;$("#t").placeholder=v==="idea"?"Ghi một ý tưởng mới…":v==="tom"?"Việc ngày mai…":v==="pick"?"Tên việc…":"Thêm việc cần làm… (mỗi dòng là một việc)";$("#dateRow").classList.toggle("hide",v!=="pick");if(v==="pick"&&!$("#dt").value)$("#dt").value=shift(today(),2)}
   $("#k").addEventListener("change",syncSel);
+  function fitForm(){
+    var t=$("#t");t.style.height="auto";t.style.height=Math.min(t.scrollHeight+2,window.innerHeight*0.4)+"px";
+    var h=$("#f").offsetHeight;$(".wrap").style.paddingBottom=(h+24)+"px";$("#toast").style.bottom=(h+12)+"px";
+  }
+  $("#t").addEventListener("input",fitForm);window.addEventListener("resize",fitForm);
   $("#f").addEventListener("submit",function(e){
-    e.preventDefault();var v=$("#t").value.trim();if(!v)return;
+    e.preventDefault();
+    var lines=$("#t").value.split(/\n+/).map(function(x){return x.trim()}).filter(Boolean);if(!lines.length)return;
     var sel=$("#k").value,T=today(),kind=(sel==="tom"||sel==="pick")?"once":sel,fd="";
     if(sel==="tom")fd=shift(T,1);
     if(sel==="pick"){fd=$("#dt").value;if(!fd){toast("Hãy chọn ngày");return}if(fd<=T)fd=""}
-    s.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:v,kind:kind,done:false,for:fd});
-    $("#t").value="";save();render();
-    toast(sel==="tom"?"Đã thêm vào Ngày mai":sel==="pick"&&fd?("Đã thêm vào "+lbl(fd)):sel==="daily"?"Đã thêm vào việc lặp mỗi ngày":sel==="idea"?"Đã ghi ý tưởng":"Đã thêm vào hôm nay");
+    lines.forEach(function(v,n){s.items.push({id:Date.now().toString(36)+n+Math.random().toString(36).slice(2,5),text:v,kind:kind,done:false,for:fd})});
+    $("#t").value="";save();render();fitForm();
+    var c=lines.length>1?(lines.length+" việc"):"";
+    toast(sel==="tom"?"Đã thêm "+c+" vào Ngày mai":sel==="pick"&&fd?("Đã thêm "+c+" vào "+lbl(fd)):sel==="daily"?"Đã thêm "+c+" vào việc lặp mỗi ngày":sel==="idea"?"Đã ghi ý tưởng":"Đã thêm "+c+" vào hôm nay");
   });
   document.addEventListener("click",function(e){
     var c=e.target.getAttribute&&e.target.getAttribute("data-c"),d=e.target.getAttribute&&e.target.getAttribute("data-d"),pr=e.target.getAttribute&&e.target.getAttribute("data-p"),t2=e.target.getAttribute&&e.target.getAttribute("data-t2");
@@ -140,7 +150,7 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   document.addEventListener("visibilitychange",function(){if(!document.hidden){rollover();render()}});
   load();rollover();render();
   if(new Date().getHours()>=20)$("#k").value="tom";
-  syncSel();
+  syncSel();fitForm();
 })();
 </script>
 </body>

@@ -29,8 +29,13 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .h-daily,.h-today,.h-tom{font-weight:800;font-size:14px}
 .h-daily{color:var(--ink)}
 .h-today{color:#c98a00}
+.h-bl{color:#c0392b;font-weight:800;font-size:14px}
 .h-tom{color:#2f9e5f}
-@media(prefers-color-scheme:dark){.h-today{color:#f5c542}.h-tom{color:#5fd08a}}
+@media(prefers-color-scheme:dark){.h-bl{color:#ef8a7e}.h-today{color:#f5c542}.h-tom{color:#5fd08a}}
+.item.backlog{border-left:4px solid #c0392b}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 12px;margin-bottom:8px}
+.box .empty{padding:14px 4px}
+.iditem button.arm{font-size:13px;background:var(--bad);color:#fff;border-radius:8px;padding:5px 8px;line-height:1.2;white-space:nowrap}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .bulb{position:relative;flex:none;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;padding:0}
 .bulb svg{width:27px;height:27px}
@@ -86,10 +91,15 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   <div id="daily"></div>
   <h2 class="h-today">Today · <span id="todayDate"></span></h2>
   <div id="once"></div>
+  <h2 class="h-bl">Backlog · <span id="blCount">0</span></h2>
+  <div id="backlog"></div>
   <h2 class="h-tom">Tomorrow · <span id="tomDate"></span></h2>
   <div id="tomorrow"></div>
   <div id="laterWrap"><h2>Upcoming</h2><div id="later"></div></div>
   <button class="clear" id="clear">Clear completed tasks</button>
+  <h2>💡 Ideas · <span id="ideaCount">0</span></h2>
+  <div id="ideas" class="box"></div>
+  <div id="ideaDoneWrap"><h2>Completed ideas · <span id="ideaDoneCount">0</span></h2><div id="ideasDone" class="box"></div></div>
 </div>
 <form id="f" autocomplete="off">
   <div class="row hide" id="dateRow"><label for="dt">Do it on</label><input type="date" id="dt"></div>
@@ -100,10 +110,9 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   </div>
 </form>
 <dialog id="idDlg">
-  <div class="dh"><strong>💡 New ideas</strong><button type="button" id="idClose" aria-label="Close">×</button></div>
+  <div class="dh"><strong>💡 New idea</strong><button type="button" id="idClose" aria-label="Close">×</button></div>
   <textarea id="it" rows="3" maxlength="600" placeholder="Write down your idea…" spellcheck="true" autocorrect="on" autocapitalize="sentences" lang="en" aria-label="Idea"></textarea>
   <button class="save" type="button" id="idSave">Save idea</button>
-  <div id="idList"></div>
 </dialog>
 <div class="toast" id="toast"></div>
 <script>
@@ -116,14 +125,14 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   function nice(iso,withYear){var p=iso.split("-");return MON[+p[1]-1]+" "+(+p[2])+(withYear?", "+p[0]:"")}
   function lbl(iso){var p=iso.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);return WD[d.getDay()]+", "+nice(iso)}
   function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove("on")},1700)}
-  function load(){try{var r=JSON.parse(localStorage.getItem(KEY));if(r&&r.items)s=r}catch(e){}}
+  function load(){try{var raw=localStorage.getItem(KEY);if(raw&&!localStorage.getItem(KEY+"-bak1"))localStorage.setItem(KEY+"-bak1",raw);var r=JSON.parse(raw);if(r&&r.items)s=r}catch(e){}}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
   function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
   function rollover(){
     var t=today();
     if(s.day!==t){
       s.items=s.items.filter(function(i){return i.kind!=="once"||!i.done||(i.for&&i.for>=t)}); // drop finished one-off tasks, keep unfinished ones
-      s.items.forEach(function(i){if(i.kind==="daily")i.done=false});
+      s.items.forEach(function(i){if(i.kind==="daily")i.done=false;if(i.kind==="once"&&!i.done&&(!i.for||i.for<t))i.bl=true}); // unfinished tasks from earlier days go to the backlog
       s.day=t;save();
     }
   }
@@ -131,16 +140,23 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     return '<div class="item'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+'><span>'+esc(i.text)+'</span><button data-d="'+i.id+'" aria-label="Delete">×</button></div>';
   }
   function ideaRow(i){
-    var at=i.at?'Added '+nice(i.at,true):"";
-    return '<div class="iditem'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+' aria-label="Completed"><div class="tx"><span>'+esc(i.text)+'</span><small>'+at+'</small></div>'+(i.done?'':'<button class="p" data-p="'+i.id+'" aria-label="Move to tasks for today">→ Task</button>')+'<button data-d="'+i.id+'" aria-label="Delete">×</button></div>';
+    var at=(i.at?'Added '+nice(i.at,true):"")+(i.done&&i.doneAt?' · Done '+nice(i.doneAt,true):"");
+    return '<div class="iditem'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+' aria-label="Completed"><div class="tx"><span>'+esc(i.text)+'</span><small>'+at+'</small></div>'+(i.done?'':'<button class="p" data-p="'+i.id+'" aria-label="Add a copy to today\'s tasks">→ Task</button>')+'<button data-di="'+i.id+'" aria-label="Delete idea">×</button></div>';
   }
+  function byDate(a,b){var x=a.at||"",y=b.at||"";return x<y?1:x>y?-1:0}
   function renderIdeas(){
     var all=s.items.filter(function(i){return i.kind==="idea"});
-    var open=all.filter(function(i){return!i.done}).sort(function(a,b){return(a.at||"")<(b.at||"")?1:(a.at||"")>(b.at||"")?-1:0});
-    var done=all.filter(function(i){return i.done});
+    var open=all.filter(function(i){return!i.done}).sort(byDate);
+    var done=all.filter(function(i){return i.done}).sort(function(a,b){var x=a.doneAt||a.at||"",y=b.doneAt||b.at||"";return x<y?1:x>y?-1:0});
     $("#bdg").textContent=open.length?String(open.length):"";
-    $("#idList").innerHTML=(open.length?open.map(ideaRow).join(""):'<div class="empty">No ideas waiting.</div>')+
-      (done.length?'<div class="idh">Completed ('+done.length+')</div>'+done.map(ideaRow).join(""):"");
+    $("#ideaCount").textContent=open.length;
+    $("#ideas").innerHTML=open.length?open.map(ideaRow).join(""):'<div class="empty">No ideas yet. Tap the 💡 at the top to add one.</div>';
+    $("#ideaDoneWrap").classList.toggle("hide",!done.length);
+    $("#ideaDoneCount").textContent=done.length;
+    $("#ideasDone").innerHTML=done.map(ideaRow).join("");
+  }
+  function backlogRow(i){
+    return '<div class="item backlog'+(i.done?' done':'')+'"><input type="checkbox" data-c="'+i.id+'"'+(i.done?' checked':'')+'><span>'+esc(i.text)+'</span>'+(i.done?'':'<button class="p" data-t2="'+i.id+'" aria-label="Move to today">→ Today</button>')+'<button data-d="'+i.id+'" aria-label="Delete">×</button></div>';
   }
   function futureRow(i,showDate){
     return '<div class="item future"><span>'+esc(i.text)+(showDate?'<small>'+lbl(i.for)+'</small>':'')+'</span><button class="p" data-t2="'+i.id+'" aria-label="Move to today">→ Today</button><button data-d="'+i.id+'" aria-label="Delete">×</button></div>';
@@ -149,7 +165,8 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     $("#date").textContent=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
     var T=today(),TM=shift(T,1);
     var d=s.items.filter(function(i){return i.kind==="daily"}),
-        o=s.items.filter(function(i){return i.kind==="once"&&(!i.for||i.for<=T)}),
+        o=s.items.filter(function(i){return i.kind==="once"&&!i.bl&&(!i.for||i.for<=T)}),
+        bl=s.items.filter(function(i){return i.kind==="once"&&i.bl}),
         tm=s.items.filter(function(i){return i.kind==="once"&&i.for===TM}),
         lt=s.items.filter(function(i){return i.kind==="once"&&i.for>TM}).sort(function(a,b){return a.for<b.for?-1:1});
     $("#tomDate").textContent=lbl(TM);$("#todayDate").textContent=lbl(T);
@@ -158,10 +175,13 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
     $("#later").innerHTML=lt.map(function(i){return futureRow(i,true)}).join("");
     $("#daily").innerHTML=d.map(row).join("")||'<div class="empty">Nothing yet. Choose "Every day" when adding.</div>';
     $("#once").innerHTML=o.map(row).join("")||'<div class="empty">No tasks for today.</div>';
+    var blOpen=bl.filter(function(i){return!i.done}).length;
+    $("#blCount").textContent=blOpen;
+    $("#backlog").innerHTML=bl.map(backlogRow).join("")||'<div class="empty">Nothing left over. Unfinished tasks from earlier days land here.</div>';
     renderIdeas();
     var tasks=d.concat(o),n=tasks.length,k=tasks.filter(function(i){return i.done}).length;
     $("#bar").style.width=(n?k/n*100:0)+"%";
-    $("#count").textContent=n?(k+" of "+n+" done"):"Add your first task below";
+    $("#count").textContent=(n?(k+" of "+n+" done"):"Add your first task below")+(blOpen?" · "+blOpen+" in backlog":"");
   }
   function syncSel(){var v=$("#k").value;$("#t").placeholder=v==="tom"?"Task for tomorrow…":v==="pick"?"Task name…":"Add a task… (one per line)";$("#dateRow").classList.toggle("hide",v!=="pick");if(v==="pick"&&!$("#dt").value)$("#dt").value=shift(today(),2)}
   $("#k").addEventListener("change",syncSel);
@@ -184,18 +204,20 @@ select,.go{font:inherit;border-radius:12px;border:1px solid var(--line);backgrou
   var itx=$("#it");
   function fitIdea(){itx.style.height="auto";itx.style.height=Math.min(itx.scrollHeight+2,window.innerHeight*0.4)+"px"}
   itx.addEventListener("input",fitIdea);
-  $("#bulb").onclick=function(){renderIdeas();$("#idDlg").showModal();setTimeout(function(){itx.focus()},50)};
+  $("#bulb").onclick=function(){$("#idDlg").showModal();setTimeout(function(){itx.focus()},50)};
   $("#idClose").onclick=function(){$("#idDlg").close()};
   $("#idSave").onclick=function(){
     var v=itx.value.trim();if(!v){itx.focus();return}
     s.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:v,kind:"idea",done:false,for:"",at:today()});
-    itx.value="";fitIdea();save();render();itx.focus();
+    itx.value="";fitIdea();save();render();$("#idDlg").close();toast("Idea saved");
   };
   document.addEventListener("click",function(e){
     var c=e.target.getAttribute&&e.target.getAttribute("data-c"),d=e.target.getAttribute&&e.target.getAttribute("data-d"),pr=e.target.getAttribute&&e.target.getAttribute("data-p"),t2=e.target.getAttribute&&e.target.getAttribute("data-t2");
-    if(t2){s.items.forEach(function(i){if(i.id===t2){i.for=""}});save();render();toast("Moved to today")}
-    if(pr){s.items.forEach(function(i){if(i.id===pr){i.kind="once";i.done=false}});save();render()}
-    if(c){s.items.forEach(function(i){if(i.id===c)i.done=e.target.checked});save();render()}
+    var di=e.target.getAttribute&&e.target.getAttribute("data-di");
+    if(t2){s.items.forEach(function(i){if(i.id===t2){i.for="";i.bl=false}});save();render();toast("Moved to today")}
+    if(pr){var src=s.items.filter(function(i){return i.id===pr})[0];if(src){s.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:src.text,kind:"once",done:false,for:""});save();render();toast("Added to Today (idea kept)")}}
+    if(c){s.items.forEach(function(i){if(i.id===c){i.done=e.target.checked;if(i.kind==="idea")i.doneAt=i.done?today():""}});save();render()}
+    if(di){var b=e.target;if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Delete?";clearTimeout(b._h);b._h=setTimeout(function(){b.classList.remove("arm");b.textContent="×"},3000)}else{s.items=s.items.filter(function(i){return i.id!==di});save();render()}}
     if(d){s.items=s.items.filter(function(i){return i.id!==d});save();render()}
   });
   $("#clear").onclick=function(){s.items=s.items.filter(function(i){return i.kind!=="once"||!i.done});save();render()};
